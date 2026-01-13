@@ -38,16 +38,21 @@ export default function Header() {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center space-x-10">
-                        {['Home', 'Menu', 'About', 'Contact'].map((item) => (
+                        {[
+                            { label: 'Home', href: '/' },
+                            { label: 'Menu', href: '/menu' },
+                            { label: 'About Us', href: '/about' },
+                            { label: 'Contact', href: '/contact' }
+                        ].map((item) => (
                             <Link
-                                key={item}
-                                href={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
+                                key={item.label}
+                                href={item.href}
                                 className={cn(
-                                    "text-sm font-medium tracking-wide transition-colors hover:text-accent",
+                                    "text-[11px] font-semibold tracking-[0.2em] uppercase transition-colors hover:text-accent",
                                     scrolled || mobileMenuOpen ? "text-gray-600" : "text-white/90 hover:text-white"
                                 )}
                             >
-                                {item}
+                                {item.label}
                             </Link>
                         ))}
                     </div>
@@ -107,14 +112,19 @@ export default function Header() {
                         className="md:hidden pt-4 pb-8"
                     >
                         <div className="flex flex-col space-y-4">
-                            {['Home', 'Menu', 'About', 'Contact'].map((item) => (
+                            {[
+                                { label: 'Home', href: '/' },
+                                { label: 'Menu', href: '/menu' },
+                                { label: 'About Us', href: '/about' },
+                                { label: 'Contact', href: '/contact' }
+                            ].map((item) => (
                                 <Link
-                                    key={item}
-                                    href={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
-                                    className="text-lg text-gray-800 hover:text-primary font-medium border-b border-gray-100 pb-2"
+                                    key={item.label}
+                                    href={item.href}
+                                    className="text-sm tracking-widest uppercase text-gray-800 hover:text-primary font-medium border-b border-gray-100 pb-2"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
-                                    {item}
+                                    {item.label}
                                 </Link>
                             ))}
                         </div>

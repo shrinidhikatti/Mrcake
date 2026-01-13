@@ -89,13 +89,13 @@ export default function HomeView({ featuredProducts }: HomeViewProps) {
 
             {/* 2. Minimalist Introduction */}
             <section className="py-16 md:py-24 bg-white">
-                <div className="max-w-7xl mx-auto px-4 md:px-8 text-left">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
                     <motion.h3
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8 }}
-                        className="text-3xl md:text-4xl font-display font-medium text-gray-900 mb-6 max-w-3xl"
+                        className="text-3xl md:text-4xl font-display font-medium text-gray-900 mb-6 mx-auto max-w-3xl"
                     >
                         Crafted with intention.
                     </motion.h3>
@@ -104,7 +104,7 @@ export default function HomeView({ featuredProducts }: HomeViewProps) {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="text-gray-500 font-light text-lg leading-relaxed text-balance max-w-3xl"
+                        className="text-gray-500 font-light text-lg leading-relaxed text-balance mx-auto max-w-3xl"
                     >
                         We believe in the purity of ingredients. Our cakes are baked fresh daily using the finest Belgian chocolate, organic flour, and farm-fresh cream. No preservatives, just pure indulgence.
                     </motion.p>
@@ -114,11 +114,8 @@ export default function HomeView({ featuredProducts }: HomeViewProps) {
             {/* 3. Featured Collection (Gallery Grid) */}
             <section className="pb-32 w-full px-4 md:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="flex justify-between items-end mb-10">
+                    <div className="flex justify-center items-center mb-10">
                         <h2 className="text-2xl font-display text-gray-900">Signatures</h2>
-                        <Link href="/products" className="text-sm font-medium text-gray-500 hover:text-black transition-colors flex items-center gap-2">
-                            View All <ArrowRight className="w-4 h-4" />
-                        </Link>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-16">
