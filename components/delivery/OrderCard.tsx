@@ -9,6 +9,8 @@ interface Order {
     orderNumber: string
     status: string
     total: number
+    paymentMethod: string
+    paymentStatus: string
     createdAt: string
     user: {
         name: string
@@ -55,6 +57,15 @@ export default function OrderCard({ order, onUpdate }: OrderCardProps) {
     const handleUpdateStatus = async () => {
         const next = getNextStatus()
         if (!next) return
+
+        // COD Cash Collection Check
+        if (next.status === 'DELIVERED' &&
+            (order.paymentMethod === 'COD' || order.paymentMethod === 'CASH') &&
+            order.paymentStatus === 'PENDING'
+        ) {
+            const confirmed = window.confirm(`⚠️ CASH COLLECTION REQUIRED\n\nPlease collect ₹${order.total} from the customer before completing delivery.\n\nHave you collected the cash?`)
+            if (!confirmed) return
+        }
 
         setUpdating(true)
         try {

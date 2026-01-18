@@ -72,12 +72,22 @@ export async function PATCH(
         })
 
         // Update order
+        const updateData: any = {
+            status,
+            statusHistory: JSON.stringify(statusHistory)
+        }
+
+        // If COD and Delivered, mark as PAID
+        if (status === 'DELIVERED' &&
+            (currentOrder.paymentMethod === 'COD' || currentOrder.paymentMethod === 'CASH') &&
+            currentOrder.paymentStatus === 'PENDING'
+        ) {
+            updateData.paymentStatus = 'PAID'
+        }
+
         const order = await prisma.order.update({
             where: { id: params.id },
-            data: {
-                status,
-                statusHistory: JSON.stringify(statusHistory)
-            },
+            data: updateData,
             include: {
                 deliveryPartner: true,
                 user: true,

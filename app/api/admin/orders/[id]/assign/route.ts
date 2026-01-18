@@ -29,6 +29,22 @@ export async function PATCH(
             return NextResponse.json({ error: "Delivery partner not found" }, { status: 404 })
         }
 
+        // Check availability - STRICT 1 ACTIVE ORDER LIMIT
+        const existingActiveOrders = await prisma.order.count({
+            where: {
+                deliveryPartnerId,
+                status: {
+                    in: ['ASSIGNED', 'PICKED_UP', 'OUT_FOR_DELIVERY']
+                }
+            }
+        })
+
+        if (existingActiveOrders > 0) {
+            return NextResponse.json({
+                error: "Partner already has an active delivery. One delivery per partner allowed."
+            }, { status: 400 })
+        }
+
         // Get current order to append to history
         const currentOrder = await prisma.order.findUnique({
             where: { id: params.id }
