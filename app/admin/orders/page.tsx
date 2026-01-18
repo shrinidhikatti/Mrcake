@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { ShoppingBag, Search, Eye, RefreshCw, Filter, Calendar, MapPin, Phone } from "lucide-react"
+import { ShoppingBag, Search, Eye, RefreshCw, Filter, Calendar, MapPin, Phone, Clock } from "lucide-react"
 import Link from "next/link"
 
 export default async function AdminOrdersPage() {
@@ -7,6 +7,7 @@ export default async function AdminOrdersPage() {
         include: {
             user: true,
             address: true,
+            deliveryPartner: true,
             items: {
                 include: { product: true }
             }

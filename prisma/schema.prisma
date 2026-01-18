@@ -85,7 +85,10 @@ model Order {
   deliveryFee         Float
   tax                 Float
   total               Float
-  status              String    @default("PENDING") // PENDING, CONFIRMED, PREPARING, OUT_FOR_DELIVERY, DELIVERED, CANCELLED
+  status              String    @default("PENDING") // PENDING, CONFIRMED, PREPARING, READY_FOR_PICKUP, ASSIGNED, PICKED_UP, OUT_FOR_DELIVERY, DELIVERED, CANCELLED
+  deliveryPartnerId   String?
+  deliveryPartner     DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
+  statusHistory       String?   // JSON array of {status, timestamp, note}
   paymentId           String?
   paymentStatus       String    @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
   deliveryDate        DateTime
@@ -126,4 +129,19 @@ model PasswordResetToken {
 
   @@index([email])
   @@index([token])
+}
+
+model DeliveryPartner {
+  id              String   @id @default(cuid())
+  name            String
+  phone           String   @unique
+  email           String?  @unique
+  password        String   // Hashed password for login
+  vehicleType     String?  // Bike, Scooter, etc.
+  vehicleNumber   String?
+  status          String   @default("AVAILABLE") // AVAILABLE, BUSY, OFFLINE
+  totalDeliveries Int      @default(0)
+  orders          Order[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

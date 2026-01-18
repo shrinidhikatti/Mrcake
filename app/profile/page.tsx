@@ -13,6 +13,8 @@ export default function ProfilePage() {
     const [activeTab, setActiveTab] = useState('overview')
     const [stats, setStats] = useState({ orders: 0, reviews: 0 })
     const [loadingStats, setLoadingStats] = useState(true)
+    const [orders, setOrders] = useState<any[]>([])
+    const [loadingOrders, setLoadingOrders] = useState(false)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -31,6 +33,19 @@ export default function ProfilePage() {
                 .catch(() => setLoadingStats(false))
         }
     }, [session])
+
+    useEffect(() => {
+        if (session && activeTab === 'orders' && orders.length === 0) {
+            setLoadingOrders(true)
+            fetch('/api/orders/user')
+                .then(res => res.json())
+                .then(data => {
+                    setOrders(data)
+                    setLoadingOrders(false)
+                })
+                .catch(() => setLoadingOrders(false))
+        }
+    }, [session, activeTab, orders.length])
 
     if (status === 'loading') {
         return (
@@ -160,11 +175,72 @@ export default function ProfilePage() {
                             {activeTab === 'orders' && (
                                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                                     <h3 className="text-xl font-display font-bold text-gray-900 mb-6">Order History</h3>
-                                    <div className="text-center py-20 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-                                        <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                                        <p className="text-gray-500 font-medium font-display">No orders yet.</p>
-                                        <p className="text-sm text-gray-400 mt-1">Ready to try our delicious treats?</p>
-                                    </div>
+
+                                    {loadingOrders ? (
+                                        <div className="text-center py-20">
+                                            <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
+                                        </div>
+                                    ) : orders.length === 0 ? (
+                                        <div className="text-center py-20 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                                            <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                                            <p className="text-gray-500 font-medium font-display">No orders yet.</p>
+                                            <p className="text-sm text-gray-400 mt-1">Ready to try our delicious treats?</p>
+                                            <Link href="/menu" className="inline-block mt-4 bg-gray-900 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-black transition">
+                                                Browse Menu
+                                            </Link>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {orders.map((order) => {
+                                                const statusColors: Record<string, string> = {
+                                                    PENDING: 'bg-orange-100 text-orange-600',
+                                                    CONFIRMED: 'bg-blue-100 text-blue-600',
+                                                    PREPARING: 'bg-purple-100 text-purple-600',
+                                                    ASSIGNED: 'bg-indigo-100 text-indigo-600',
+                                                    PICKED_UP: 'bg-cyan-100 text-cyan-600',
+                                                    OUT_FOR_DELIVERY: 'bg-teal-100 text-teal-600',
+                                                    DELIVERED: 'bg-success/10 text-success',
+                                                    CANCELLED: 'bg-destructive/10 text-destructive',
+                                                }
+
+                                                return (
+                                                    <div key={order.id} className="bg-white p-6 rounded-2xl border border-gray-100 hover:shadow-md transition-shadow">
+                                                        <div className="flex items-start justify-between mb-4">
+                                                            <div>
+                                                                <p className="font-bold text-gray-900">#{order.orderNumber}</p>
+                                                                <p className="text-xs text-gray-500 mt-1">
+                                                                    {new Date(order.createdAt).toLocaleDateString('en-IN', {
+                                                                        day: 'numeric',
+                                                                        month: 'short',
+                                                                        year: 'numeric'
+                                                                    })}
+                                                                </p>
+                                                            </div>
+                                                            <span className={cn(
+                                                                "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                                                                statusColors[order.status] || 'bg-gray-100 text-gray-600'
+                                                            )}>
+                                                                {order.status.replace(/_/g, ' ')}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between">
+                                                            <div>
+                                                                <p className="text-sm text-gray-600">{order.items.length} item{order.items.length > 1 ? 's' : ''}</p>
+                                                                <p className="text-lg font-bold text-primary mt-1">₹{order.total}</p>
+                                                            </div>
+                                                            <Link
+                                                                href={`/orders/${order.id}`}
+                                                                className="bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-black transition"
+                                                            >
+                                                                Track Order
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
