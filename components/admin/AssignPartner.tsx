@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Loader2, UserCheck } from 'lucide-react'
 
 interface DeliveryPartner {
@@ -20,6 +21,7 @@ interface AssignPartnerProps {
 }
 
 export default function AssignPartner({ orderId, currentPartnerId, currentPartnerName }: AssignPartnerProps) {
+    const router = useRouter()
     const [partners, setPartners] = useState<DeliveryPartner[]>([])
     const [loading, setLoading] = useState(false)
     const [assigning, setAssigning] = useState(false)
@@ -59,7 +61,7 @@ export default function AssignPartner({ orderId, currentPartnerId, currentPartne
             })
 
             if (res.ok) {
-                window.location.reload()
+                router.refresh()
             } else {
                 alert('Failed to assign partner')
             }

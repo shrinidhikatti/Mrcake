@@ -1,17 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { jwtVerify } from "jose"
-
-const secret = new TextEncoder().encode(process.env.AUTH_SECRET || "fallback-secret")
-
-async function verifyDeliveryToken(token: string) {
-    try {
-        const { payload } = await jwtVerify(token, secret)
-        return payload
-    } catch {
-        return null
-    }
-}
+import { verifyDeliveryToken } from "@/lib/deliveryAuth"
 
 // PATCH - Update order status by delivery partner
 export async function PATCH(
@@ -35,7 +24,7 @@ export async function PATCH(
         const body = await req.json()
         const { status, note } = body
 
-        // Validate status transition
+        // Validate status is one of the allowed values
         const validStatuses = ['PICKED_UP', 'OUT_FOR_DELIVERY', 'DELIVERED']
         if (!validStatuses.includes(status)) {
             return NextResponse.json({ error: "Invalid status" }, { status: 400 })
@@ -53,6 +42,19 @@ export async function PATCH(
         // Verify this order is assigned to this partner
         if (currentOrder.deliveryPartnerId !== partnerId) {
             return NextResponse.json({ error: "Not authorized for this order" }, { status: 403 })
+        }
+
+        // Validate status transition
+        const validTransitions: Record<string, string[]> = {
+            ASSIGNED: ['PICKED_UP'],
+            PICKED_UP: ['OUT_FOR_DELIVERY'],
+            OUT_FOR_DELIVERY: ['DELIVERED']
+        }
+
+        if (!validTransitions[currentOrder.status]?.includes(status)) {
+            return NextResponse.json({
+                error: `Cannot transition from ${currentOrder.status} to ${status}`
+            }, { status: 400 })
         }
 
         // Parse and update status history

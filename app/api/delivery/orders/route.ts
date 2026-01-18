@@ -1,17 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { jwtVerify } from "jose"
-
-const secret = new TextEncoder().encode(process.env.AUTH_SECRET || "fallback-secret")
-
-async function verifyDeliveryToken(token: string) {
-    try {
-        const { payload } = await jwtVerify(token, secret)
-        return payload
-    } catch {
-        return null
-    }
-}
+import { verifyDeliveryToken } from "@/lib/deliveryAuth"
 
 // GET - Get assigned orders for delivery partner
 export async function GET(req: Request) {

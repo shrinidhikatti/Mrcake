@@ -51,7 +51,15 @@ export async function PATCH(
         const body = await req.json()
         const { name, phone, email, vehicleType, vehicleNumber, status, password } = body
 
-        const updateData: any = {}
+        const updateData: Partial<{
+            name: string
+            phone: string
+            email: string | null
+            vehicleType: string | null
+            vehicleNumber: string | null
+            status: string
+            password: string
+        }> = {}
         if (name) updateData.name = name
         if (phone) updateData.phone = phone
         if (email !== undefined) updateData.email = email || null

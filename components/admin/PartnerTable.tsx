@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Edit, Trash2, Phone, Mail, Bike } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -23,6 +24,7 @@ interface PartnerTableProps {
 }
 
 export default function PartnerTable({ partners }: PartnerTableProps) {
+    const router = useRouter()
     const [filter, setFilter] = useState<string>('ALL')
 
     const filteredPartners = filter === 'ALL'
@@ -44,7 +46,7 @@ export default function PartnerTable({ partners }: PartnerTableProps) {
             })
 
             if (res.ok) {
-                window.location.reload()
+                router.refresh()
             } else {
                 alert('Failed to delete partner')
             }

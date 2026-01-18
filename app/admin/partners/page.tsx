@@ -8,7 +8,13 @@ export default async function AdminPartnersPage() {
         orderBy: { createdAt: 'desc' },
         include: {
             _count: {
-                select: { orders: true }
+                select: {
+                    orders: {
+                        where: {
+                            status: { in: ['ASSIGNED', 'PICKED_UP', 'OUT_FOR_DELIVERY'] }
+                        }
+                    }
+                }
             }
         }
     })
