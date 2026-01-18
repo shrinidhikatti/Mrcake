@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react'
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
+import { LogOut, LayoutDashboard } from 'lucide-react'
 
 export default function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -14,6 +16,7 @@ export default function Header() {
     const itemCount = useCartStore((state) => state.getItemCount())
     const { scrollY } = useScroll()
     const pathname = usePathname()
+    const { data: session } = useSession()
 
     // Pages that should always have solid header
     const solidHeaderPages = ['/cart', '/checkout', '/products', '/about', '/contact', '/menu']
@@ -33,9 +36,9 @@ export default function Header() {
             )}
         >
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center md:grid md:grid-cols-12">
                     {/* Logo - Serif for Luxury */}
-                    <Link href="/" className="flex items-center space-x-2 group z-50">
+                    <Link href="/" className="flex items-center space-x-2 group z-50 md:col-span-3 md:justify-self-start">
                         <div className={cn(
                             "text-2xl font-serif font-medium tracking-tight transition-colors",
                             shouldAlwaysBeVisible || scrolled || mobileMenuOpen ? "text-gray-900" : "text-white"
@@ -45,7 +48,7 @@ export default function Header() {
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-12">
+                    <div className="hidden md:flex items-center justify-center space-x-12 md:col-span-6 md:justify-self-center">
                         {[
                             { label: 'Home', href: '/' },
                             { label: 'Menu', href: '/menu' },
@@ -66,17 +69,55 @@ export default function Header() {
                     </div>
 
                     {/* Right Icons */}
-                    <div className="flex items-center space-x-8">
-                        <Link
-                            href="/profile"
-                            className={cn(
-                                "transition-colors p-2.5 rounded-full hover:bg-gray-100/10",
-                                shouldAlwaysBeVisible || scrolled || mobileMenuOpen ? "text-gray-800 hover:text-primary" : "text-white hover:text-white/80"
-                            )}
-                            aria-label="User profile"
-                        >
-                            <User className="w-6 h-6" />
-                        </Link>
+                    <div className="flex items-center space-x-8 md:col-span-3 md:justify-self-end">
+                        {session ? (
+                            <div className="relative group/user">
+                                <button
+                                    className={cn(
+                                        "transition-colors p-2.5 rounded-full hover:bg-gray-100/10 flex items-center gap-2",
+                                        shouldAlwaysBeVisible || scrolled || mobileMenuOpen ? "text-gray-800 hover:text-primary" : "text-white hover:text-white/80"
+                                    )}
+                                >
+                                    {session.user?.image ? (
+                                        <img src={session.user.image} alt="" className="w-6 h-6 rounded-full" />
+                                    ) : (
+                                        <User className="w-6 h-6" />
+                                    )}
+                                    <span className="hidden lg:block text-xs font-bold uppercase tracking-wider">{session.user?.name?.split(' ')[0]}</span>
+                                </button>
+
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-border opacity-0 invisible group-hover/user:opacity-100 group-hover/user:visible transition-all duration-200 z-[60] py-2 overflow-hidden">
+                                    <Link href="/profile" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <User className="w-4 h-4" />
+                                        Profile
+                                    </Link>
+                                    {session.user.role === 'ADMIN' && (
+                                        <Link href="/admin" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100">
+                                            <LayoutDashboard className="w-4 h-4" />
+                                            Admin Panel
+                                        </Link>
+                                    )}
+                                    <button
+                                        onClick={() => signOut()}
+                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-destructive hover:bg-destructive/5 transition-colors border-t border-gray-100"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        Sign Out
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <Link
+                                href="/login"
+                                className={cn(
+                                    "transition-colors p-2.5 rounded-full hover:bg-gray-100/10",
+                                    shouldAlwaysBeVisible || scrolled || mobileMenuOpen ? "text-gray-800 hover:text-primary" : "text-white hover:text-white/80"
+                                )}
+                                aria-label="Login"
+                            >
+                                <User className="w-6 h-6" />
+                            </Link>
+                        )}
 
                         <Link
                             href="/cart"
@@ -98,6 +139,7 @@ export default function Header() {
                         <button
                             className={cn(
                                 "md:hidden transition-colors",
+                                "md:hidden", /* Explicitly hide on desktop to be safe, though md:hidden is already there */
                                 shouldAlwaysBeVisible || scrolled || mobileMenuOpen ? "text-gray-800" : "text-white"
                             )}
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
