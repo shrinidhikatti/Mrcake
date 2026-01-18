@@ -3,11 +3,36 @@ import { ShoppingBag, Package, Users, TrendingUp, Clock, CheckCircle2, ChevronRi
 import Link from "next/link"
 
 export default async function AdminDashboard() {
+    // Fetch real statistics from database
+    const totalOrders = await prisma.order.count()
+
+    const activeProducts = await prisma.product.count({
+        where: { inStock: true }
+    })
+
+    const totalCustomers = await prisma.user.count({
+        where: { role: 'CUSTOMER' }
+    })
+
+    // Calculate month-to-date revenue
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+
+    const revenueData = await prisma.order.aggregate({
+        _sum: { total: true },
+        where: {
+            status: 'DELIVERED',
+            createdAt: { gte: startOfMonth }
+        }
+    })
+
+    const revenue = revenueData._sum.total || 0
+
     const stats = [
-        { label: "Total Orders", value: "124", icon: ShoppingBag, color: "text-blue-600", bg: "bg-blue-50" },
-        { label: "Active Products", value: "18", icon: Package, color: "text-orange-600", bg: "bg-orange-50" },
-        { label: "Total Customers", value: "842", icon: Users, color: "text-green-600", bg: "bg-green-50" },
-        { label: "Revenue (Mtd)", value: "₹42,350", icon: TrendingUp, color: "text-purple-600", bg: "bg-purple-50" },
+        { label: "Total Orders", value: totalOrders.toString(), icon: ShoppingBag, color: "text-blue-600", bg: "bg-blue-50" },
+        { label: "Active Products", value: activeProducts.toString(), icon: Package, color: "text-orange-600", bg: "bg-orange-50" },
+        { label: "Total Customers", value: totalCustomers.toString(), icon: Users, color: "text-green-600", bg: "bg-green-50" },
+        { label: "Revenue (MTD)", value: `₹${revenue.toLocaleString('en-IN')}`, icon: TrendingUp, color: "text-purple-600", bg: "bg-purple-50" },
     ]
 
     const recentOrders = await prisma.order.findMany({

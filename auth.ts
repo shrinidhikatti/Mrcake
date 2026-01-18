@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
+import { rateLimit } from "@/lib/rateLimit"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(prisma),
@@ -15,6 +16,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) return null
+
+                // Rate limiting: 5 attempts per 15 minutes per email
+                const identifier = `login:${credentials.email}`
+                const rateLimitOk = rateLimit(identifier, {
+                    interval: 15 * 60 * 1000, // 15 minutes
+                    maxRequests: 5
+                })
+
+                if (!rateLimitOk) {
+                    throw new Error('Too many login attempts. Please try again later.')
+                }
 
                 const user = await prisma.user.findUnique({
                     where: { email: credentials.email as string },
@@ -42,7 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                token.role = (user as any).role
+                token.role = user.role as string
             }
             return token
         },
@@ -59,5 +71,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     session: {
         strategy: "jwt",
+    },
+    cookies: {
+        sessionToken: {
+            name: `next-auth.session-token`,
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: process.env.NODE_ENV === 'production'
+            }
+        }
     },
 })

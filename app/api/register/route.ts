@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
+import { rateLimit } from '@/lib/rateLimit'
 
 export async function POST(req: Request) {
     try {
@@ -10,6 +11,20 @@ export async function POST(req: Request) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
+            )
+        }
+
+        // Rate limiting: 3 registrations per hour per IP
+        const identifier = `register:${req.headers.get('x-forwarded-for') || 'unknown'}`
+        const rateLimitOk = rateLimit(identifier, {
+            interval: 60 * 60 * 1000, // 1 hour
+            maxRequests: 3
+        })
+
+        if (!rateLimitOk) {
+            return NextResponse.json(
+                { error: 'Too many registration attempts. Please try again later.' },
+                { status: 429 }
             )
         }
 

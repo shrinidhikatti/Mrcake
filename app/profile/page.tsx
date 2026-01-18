@@ -11,12 +11,26 @@ export default function ProfilePage() {
     const { data: session, status } = useSession()
     const router = useRouter()
     const [activeTab, setActiveTab] = useState('overview')
+    const [stats, setStats] = useState({ orders: 0, reviews: 0 })
+    const [loadingStats, setLoadingStats] = useState(true)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
             router.push('/login?callbackUrl=/profile')
         }
     }, [status, router])
+
+    useEffect(() => {
+        if (session) {
+            fetch('/api/user/stats')
+                .then(res => res.json())
+                .then(data => {
+                    setStats(data)
+                    setLoadingStats(false)
+                })
+                .catch(() => setLoadingStats(false))
+        }
+    }, [session])
 
     if (status === 'loading') {
         return (
@@ -75,11 +89,15 @@ export default function ProfilePage() {
 
                         <div className="hidden lg:grid grid-cols-2 gap-4 shrink-0">
                             <div className="bg-secondary/5 p-6 rounded-2xl border border-secondary/10 text-center">
-                                <span className="block text-2xl font-display font-bold text-secondary">0</span>
+                                <span className="block text-2xl font-display font-bold text-secondary">
+                                    {loadingStats ? '...' : stats.orders}
+                                </span>
                                 <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Orders</span>
                             </div>
                             <div className="bg-success/5 p-6 rounded-2xl border border-success/10 text-center">
-                                <span className="block text-2xl font-display font-bold text-success">0</span>
+                                <span className="block text-2xl font-display font-bold text-success">
+                                    {loadingStats ? '...' : stats.reviews}
+                                </span>
                                 <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Reviews</span>
                             </div>
                         </div>

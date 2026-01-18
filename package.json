@@ -37,6 +37,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.36.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "prisma": "^5.22.0",
