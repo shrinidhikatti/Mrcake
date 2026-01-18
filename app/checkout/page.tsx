@@ -65,11 +65,31 @@ export default function CheckoutPage() {
                 name: 'MrCake Bakery',
                 description: 'Order Payment',
                 image: '/icons/icon-192x192.png',
-                handler: function (response: unknown) {
-                    console.log(response)
-                    // Success handler
-                    clearCart()
-                    router.push('/order-success')
+                handler: async function (response: any) {
+                    console.log('Payment Success:', response)
+
+                    try {
+                        // 4. Create Order in Database
+                        const orderRes = await fetch('/api/orders', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                items,
+                                subtotal,
+                                deliveryFee,
+                                total,
+                                addressData: formData
+                            })
+                        })
+
+                        if (!orderRes.ok) throw new Error('Order creation failed')
+
+                        clearCart()
+                        router.push('/order-success')
+                    } catch (err) {
+                        console.error('Order saving error:', err)
+                        alert('Payment was successful but we failed to record your order. Please contact support.')
+                    }
                 },
                 prefill: {
                     name: formData.name,
