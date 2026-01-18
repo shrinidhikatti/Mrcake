@@ -3,8 +3,6 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import { useCartStore } from '@/store/cartStore'
 import { Trash2, Plus, Minus, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -28,8 +26,7 @@ export default function CartPage() {
 
     if (items.length === 0) {
         return (
-            <div className="min-h-screen flex flex-col bg-background">
-                <Header />
+            <div className="min-h-screen flex flex-col bg-background pt-56">
                 <main className="flex-grow flex flex-col items-center justify-center p-4">
                     <div className="text-center max-w-md">
                         <Image
@@ -52,18 +49,24 @@ export default function CartPage() {
                         </Link>
                     </div>
                 </main>
-                <Footer />
             </div>
         )
     }
 
     return (
-        <div className="min-h-screen flex flex-col bg-background">
-            <Header />
-
+        <div className="min-h-screen flex flex-col bg-background pt-56">
             <main className="flex-grow py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <h1 className="text-3xl font-display font-bold mb-8">Shopping Cart</h1>
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-display font-bold">Shopping Cart</h1>
+                        <Link
+                            href="/products"
+                            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            Continue Shopping
+                        </Link>
+                    </div>
 
                     <div className="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start">
                         {/* Cart Items */}
@@ -169,8 +172,6 @@ export default function CartPage() {
                     </div>
                 </div>
             </main>
-
-            <Footer />
         </div>
     )
 }

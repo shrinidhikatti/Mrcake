@@ -1,8 +1,6 @@
-import Link from 'next/link'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import { prisma } from '@/lib/prisma'
 import ProductGrid from '@/components/shop/ProductGrid'
+import BackButton from '@/components/BackButton'
 
 async function getProducts() {
     return await prisma.product.findMany({
@@ -44,9 +42,8 @@ export default async function ProductsPage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-[#FDFBF7]">
-            <Header />
-
-            <div className="bg-white pt-24 pb-12 relative overflow-hidden">
+            <BackButton />
+            <div className="bg-white pt-56 pb-12 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-secondary/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
                 <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -ml-20 -mt-20"></div>
 
@@ -59,11 +56,9 @@ export default async function ProductsPage() {
                 </div>
             </div>
 
-            <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+            <main className="flex-grow w-full px-4 sm:px-6 lg:px-8 pb-20">
                 <ProductGrid initialProducts={products} categories={categories} />
             </main>
-
-            <Footer />
         </div>
     )
 }

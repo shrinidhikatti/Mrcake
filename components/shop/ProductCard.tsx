@@ -41,7 +41,7 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
         <motion.div
             className="group relative"
         >
-            <Link href={`/products/${product.slug}`} className="block relative aspect-square overflow-hidden bg-secondary/20 rounded-sm">
+            <Link href={`/products/${product.slug}`} className="block relative aspect-[4/5] overflow-hidden bg-secondary/20 rounded-sm">
                 <Image
                     src={product.image}
                     alt={product.name}
@@ -61,11 +61,11 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
                 </button>
             </Link>
 
-            <div className="mt-4 text-left">
+            <div className="mt-3 text-left">
                 <Link href={`/products/${product.slug}`}>
-                    <h3 className="text-base font-medium text-gray-900 tracking-tight hover:text-gray-600 transition-colors">{product.name}</h3>
+                    <h3 className="text-sm md:text-base font-medium text-gray-900 tracking-tight hover:text-gray-600 transition-colors line-clamp-1">{product.name}</h3>
                 </Link>
-                <p className="text-sm text-gray-500 mt-1">₹{product.price}</p>
+                <p className="text-sm md:text-base text-gray-900 font-semibold mt-1">₹{product.price}</p>
             </div>
         </motion.div>
     )

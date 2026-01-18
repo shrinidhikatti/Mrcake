@@ -37,16 +37,16 @@ export default function ProductGrid({ initialProducts, categories }: ProductGrid
     return (
         <>
             {/* Categories Filter */}
-            <div className="bg-secondary/30 py-4 sticky top-[72px] z-20 backdrop-blur-md border-b border-white/50 mb-8">
+            <div className="py-8 mb-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-center items-center gap-4 overflow-x-auto no-scrollbar pb-2 sm:pb-0">
+                    <div className="flex justify-center items-center gap-5 overflow-x-auto flex-wrap">
                         <button
                             onClick={() => setFilter('all')}
                             className={cn(
-                                "px-6 py-2 rounded-full font-medium transition-all duration-300 whitespace-nowrap text-sm tracking-wide",
+                                "text-sm font-medium rounded-full transition-all duration-200",
                                 filter === 'all'
-                                    ? "bg-primary text-white shadow-lg scale-105"
-                                    : "bg-white text-gray-600 hover:bg-white/80 border border-transparent hover:border-gray-200"
+                                    ? "bg-gray-900 text-white px-7 py-3"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 px-6 py-2.5"
                             )}
                         >
                             All Treats
@@ -56,10 +56,10 @@ export default function ProductGrid({ initialProducts, categories }: ProductGrid
                                 key={category.id}
                                 onClick={() => setFilter(category.id)}
                                 className={cn(
-                                    "px-6 py-2 rounded-full font-medium transition-all duration-300 whitespace-nowrap text-sm tracking-wide",
+                                    "text-sm font-medium rounded-full transition-all duration-200",
                                     filter === category.id
-                                        ? "bg-primary text-white shadow-lg scale-105"
-                                        : "bg-white text-gray-600 hover:bg-white/80 border border-transparent hover:border-gray-200"
+                                        ? "bg-gray-900 text-white px-7 py-3"
+                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 px-6 py-2.5"
                                 )}
                             >
                                 {category.name}
@@ -72,7 +72,7 @@ export default function ProductGrid({ initialProducts, categories }: ProductGrid
             {/* Grid */}
             <motion.div
                 layout
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-[1400px] mx-auto"
             >
                 <AnimatePresence>
                     {filteredProducts.map((product) => (
