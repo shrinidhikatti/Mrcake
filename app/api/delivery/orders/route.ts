@@ -1,23 +1,17 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { verifyDeliveryToken } from "@/lib/deliveryAuth"
+import { auth } from "@/auth"
 
 // GET - Get assigned orders for delivery partner
 export async function GET(req: Request) {
     try {
-        const authHeader = req.headers.get('authorization')
-        if (!authHeader?.startsWith('Bearer ')) {
+        const session = await auth()
+
+        if (!session || session.user.role !== 'DELIVERY_PARTNER') {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
-        const token = authHeader.substring(7)
-        const payload = await verifyDeliveryToken(token)
-
-        if (!payload || payload.role !== 'DELIVERY_PARTNER') {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-        }
-
-        const partnerId = payload.id as string
+        const partnerId = session.user.id
 
         // Get orders assigned to this partner
         const orders = await prisma.order.findMany({

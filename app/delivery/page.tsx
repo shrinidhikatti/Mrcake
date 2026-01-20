@@ -2,16 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, LogOut, Package, CheckCircle, Bike, Phone, MapPin, Navigation } from 'lucide-react'
+import { useSession, signOut } from 'next-auth/react'
+import { Loader2, LogOut, Package, CheckCircle, Bike } from 'lucide-react'
 import OrderCard from '@/components/delivery/OrderCard'
-
-interface DeliveryPartner {
-    id: string
-    name: string
-    phone: string
-    status: string
-    totalDeliveries: number
-}
 
 interface Order {
     id: string
@@ -42,38 +35,50 @@ interface Order {
 
 export default function DeliveryDashboard() {
     const router = useRouter()
-    const [partner, setPartner] = useState<DeliveryPartner | null>(null)
+    const { data: session, status } = useSession()
     const [orders, setOrders] = useState<Order[]>([])
     const [loading, setLoading] = useState(true)
     const [tab, setTab] = useState<'active' | 'completed'>('active')
+    const [totalDeliveries, setTotalDeliveries] = useState(0)
 
     useEffect(() => {
-        const token = localStorage.getItem('delivery_token')
-        const partnerData = localStorage.getItem('delivery_partner')
+        if (status === 'loading') return
 
-        if (!token || !partnerData) {
-            router.push('/delivery/login')
+        if (status === 'unauthenticated' || !session) {
+            router.push('/login?callbackUrl=/delivery')
             return
         }
 
-        setPartner(JSON.parse(partnerData))
-        loadOrders(token)
-    }, [router])
+        if (session.user.role !== 'DELIVERY_PARTNER') {
+            router.push('/')
+            return
+        }
 
-    const loadOrders = async (token: string) => {
+        loadOrders()
+        loadPartnerStats()
+    }, [status, session, router])
+
+    const loadPartnerStats = async () => {
         try {
-            const res = await fetch('/api/delivery/orders', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
+            const res = await fetch('/api/delivery/stats')
+            if (res.ok) {
+                const data = await res.json()
+                setTotalDeliveries(data.totalDeliveries || 0)
+            }
+        } catch (error) {
+            console.error('Failed to load stats')
+        }
+    }
+
+    const loadOrders = async () => {
+        try {
+            const res = await fetch('/api/delivery/orders')
 
             if (res.ok) {
                 const data = await res.json()
                 setOrders(data)
             } else if (res.status === 401) {
-                // Token expired
-                handleLogout()
+                router.push('/login')
             }
         } catch (error) {
             console.error('Failed to load orders')
@@ -83,17 +88,13 @@ export default function DeliveryDashboard() {
     }
 
     const handleLogout = () => {
-        localStorage.removeItem('delivery_token')
-        localStorage.removeItem('delivery_partner')
-        router.push('/delivery/login')
+        signOut({ callbackUrl: '/login' })
     }
 
     const handleRefresh = () => {
-        const token = localStorage.getItem('delivery_token')
-        if (token) {
-            setLoading(true)
-            loadOrders(token)
-        }
+        setLoading(true)
+        loadOrders()
+        loadPartnerStats()
     }
 
     if (loading) {
@@ -119,7 +120,7 @@ export default function DeliveryDashboard() {
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500">Welcome back,</p>
-                                <p className="font-bold text-gray-900">{partner?.name}</p>
+                                <p className="font-bold text-gray-900">{session?.user?.name}</p>
                             </div>
                         </div>
                         <button
@@ -139,7 +140,7 @@ export default function DeliveryDashboard() {
                         </div>
                         <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
                             <p className="text-xs text-primary/70 font-bold uppercase tracking-wider mb-1">Completed</p>
-                            <p className="text-2xl font-display font-bold text-primary">{partner?.totalDeliveries || 0}</p>
+                            <p className="text-2xl font-display font-bold text-primary">{totalDeliveries}</p>
                         </div>
                     </div>
                 </div>

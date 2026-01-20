@@ -4,9 +4,10 @@ import Link from "next/link"
 import AssignPartner from "@/components/admin/AssignPartner"
 import { notFound } from "next/navigation"
 
-export default async function OrderDetailsPage({ params }: { params: { id: string } }) {
+export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
     const order = await prisma.order.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             user: true,
             address: true,

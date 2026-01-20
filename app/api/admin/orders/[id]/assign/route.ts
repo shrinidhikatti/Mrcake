@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 // PATCH - Assign delivery partner to order
 export async function PATCH(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await auth()
@@ -13,6 +13,7 @@ export async function PATCH(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
+        const { id } = await params
         const body = await req.json()
         const { deliveryPartnerId } = body
 
@@ -47,7 +48,7 @@ export async function PATCH(
 
         // Get current order to append to history
         const currentOrder = await prisma.order.findUnique({
-            where: { id: params.id }
+            where: { id }
         })
 
         if (!currentOrder) {
@@ -71,7 +72,7 @@ export async function PATCH(
 
         // Update order
         const order = await prisma.order.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 deliveryPartnerId,
                 status: 'ASSIGNED',

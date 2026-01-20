@@ -6,15 +6,7 @@ import Image from 'next/image'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { useCartStore } from '@/store/cartStore'
-import { loadRazorpay } from '@/lib/razorpay'
 import { ArrowLeft, CreditCard, Loader2 } from 'lucide-react'
-
-declare global {
-    interface Window {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Razorpay: any
-    }
-}
 
 export default function CheckoutPage() {
     const router = useRouter()
@@ -50,64 +42,35 @@ export default function CheckoutPage() {
         setLoading(true)
 
         try {
-            // 1. Load Razorpay SDK
-            const isLoaded = await loadRazorpay()
-            if (!isLoaded) {
-                alert('Razorpay SDK failed to load')
-                return
-            }
+            // TEST MODE: Auto-approve payment for testing
+            console.log('Processing test payment...')
 
-            // 2. Create Order (Using API route in a proper app, but direct for now/demo)
-            const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_placeholder', // Mock key
-                amount: total * 100,
-                currency: 'INR',
-                name: 'MrCake Bakery',
-                description: 'Order Payment',
-                image: '/icons/icon-192x192.png',
-                handler: async function (response: any) {
-                    console.log('Payment Success:', response)
+            // Simulate payment delay
+            await new Promise(resolve => setTimeout(resolve, 1500))
 
-                    try {
-                        // 4. Create Order in Database
-                        const orderRes = await fetch('/api/orders', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                items,
-                                subtotal,
-                                deliveryFee,
-                                total,
-                                addressData: formData
-                            })
-                        })
+            // Create Order in Database
+            const orderRes = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items,
+                    subtotal,
+                    deliveryFee,
+                    total,
+                    addressData: formData,
+                    paymentId: `test_payment_${Date.now()}`, // Test payment ID
+                    paymentStatus: 'SUCCESS'
+                })
+            })
 
-                        if (!orderRes.ok) throw new Error('Order creation failed')
+            if (!orderRes.ok) throw new Error('Order creation failed')
 
-                        clearCart()
-                        router.push('/order-success')
-                    } catch (err) {
-                        console.error('Order saving error:', err)
-                        alert('Payment was successful but we failed to record your order. Please contact support.')
-                    }
-                },
-                prefill: {
-                    name: formData.name,
-                    email: formData.email,
-                    contact: formData.phone,
-                },
-                theme: {
-                    color: '#8B4513',
-                },
-            }
-
-            // 3. Open Razorpay Interface
-            const paymentObject = new window.Razorpay(options)
-            paymentObject.open()
+            clearCart()
+            router.push('/order-success')
 
         } catch (error) {
             console.error('Payment Error:', error)
-            alert('Something went wrong with payment initiation')
+            alert('Something went wrong with payment. Please try again.')
         } finally {
             setLoading(false)
         }
@@ -285,19 +248,19 @@ export default function CheckoutPage() {
                                 {loading ? (
                                     <>
                                         <Loader2 className="w-5 h-5 animate-spin" />
-                                        Processing...
+                                        Processing Payment...
                                     </>
                                 ) : (
                                     <>
                                         <CreditCard className="w-5 h-5" />
-                                        Pay ₹{total}
+                                        Place Order (₹{total})
                                     </>
                                 )}
                             </button>
 
                             <p className="mt-4 text-xs text-center text-foreground/50 flex items-center justify-center gap-1">
                                 <span className="w-2 h-2 rounded-full bg-success"></span>
-                                SSL Secured Payment
+                                Test Mode - Payment Auto-Approved
                             </p>
                         </section>
                     </div>

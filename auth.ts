@@ -28,26 +28,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     throw new Error('Too many login attempts. Please try again later.')
                 }
 
+                // First, try to find in User table
                 const user = await prisma.user.findUnique({
                     where: { email: credentials.email as string },
                 })
 
-                if (!user || !user.password) return null
+                if (user && user.password) {
+                    const isValid = await bcrypt.compare(
+                        credentials.password as string,
+                        user.password
+                    )
 
-                const isValid = await bcrypt.compare(
-                    credentials.password as string,
-                    user.password
-                )
-
-                if (!isValid) return null
-
-                return {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    image: user.image,
-                    role: user.role,
+                    if (isValid) {
+                        return {
+                            id: user.id,
+                            name: user.name,
+                            email: user.email,
+                            image: user.image,
+                            role: user.role,
+                        }
+                    }
                 }
+
+                // If not found in User table, check DeliveryPartner table
+                const deliveryPartner = await prisma.deliveryPartner.findUnique({
+                    where: { email: credentials.email as string },
+                })
+
+                if (deliveryPartner && deliveryPartner.password) {
+                    const isValid = await bcrypt.compare(
+                        credentials.password as string,
+                        deliveryPartner.password
+                    )
+
+                    if (isValid) {
+                        return {
+                            id: deliveryPartner.id,
+                            name: deliveryPartner.name,
+                            email: deliveryPartner.email,
+                            image: null,
+                            role: 'DELIVERY_PARTNER',
+                        }
+                    }
+                }
+
+                return null
             },
         }),
     ],
