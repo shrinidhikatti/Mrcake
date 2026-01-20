@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Save, X, Plus, Trash2, Loader2, Image as ImageIcon } from "lucide-react"
+import ImageUpload from "./ImageUpload"
 
 interface Category {
     id: string
@@ -34,7 +35,6 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [images, setImages] = useState<string[]>(initialData ? JSON.parse(initialData.images) : [])
-    const [imageUrl, setImageUrl] = useState("")
 
     const [formData, setFormData] = useState<Partial<Product>>(
         initialData || {
@@ -51,17 +51,6 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
             allergens: "",
         }
     )
-
-    const handleAddImage = () => {
-        if (imageUrl && !images.includes(imageUrl)) {
-            setImages([...images, imageUrl])
-            setImageUrl("")
-        }
-    }
-
-    const handleRemoveImage = (url: string) => {
-        setImages(images.filter((img) => img !== url))
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -174,43 +163,11 @@ export default function ProductForm({ initialData, categories }: ProductFormProp
                 {/* Media & Inventory */}
                 <div className="space-y-6">
                     <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-50 pb-4 flex items-center gap-2">
-                            <ImageIcon className="w-5 h-5" /> Product Images
-                        </h3>
-
-                        <div className="mt-4 space-y-4">
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={imageUrl}
-                                    onChange={(e) => setImageUrl(e.target.value)}
-                                    className="flex-grow bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                    placeholder="Enter image URL..."
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleAddImage}
-                                    className="p-3 bg-gray-900 text-white rounded-xl hover:bg-black transition"
-                                >
-                                    <Plus className="w-5 h-5" />
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-4">
-                                {images.map((url, idx) => (
-                                    <div key={idx} className="relative group aspect-square rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
-                                        <img src={url} alt="" className="w-full h-full object-cover" />
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveImage(url)}
-                                            className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition shadow-lg"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <ImageUpload
+                            images={images}
+                            onImagesChange={setImages}
+                            maxImages={5}
+                        />
                     </div>
 
                     <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">

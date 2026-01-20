@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ShoppingBag, User, Menu, X } from 'lucide-react'
+import { ShoppingBag, User, Menu, X, Heart } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useState, useEffect } from 'react'
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
@@ -118,6 +118,17 @@ export default function Header() {
                                 <User className="w-6 h-6" />
                             </Link>
                         )}
+
+                        <Link
+                            href="/wishlist"
+                            className={cn(
+                                "transition-colors p-2.5 rounded-full hover:bg-gray-100/10",
+                                shouldAlwaysBeVisible || scrolled || mobileMenuOpen ? "text-gray-800 hover:text-primary" : "text-white hover:text-white/80"
+                            )}
+                            aria-label="Wishlist"
+                        >
+                            <Heart className="w-6 h-6" />
+                        </Link>
 
                         <Link
                             href="/cart"

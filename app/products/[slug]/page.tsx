@@ -5,7 +5,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { prisma } from '@/lib/prisma'
 import { ArrowLeft, Star, Check, AlertCircle } from 'lucide-react'
-import AddToCartButton from '@/components/shop/AddToCartButton'
+import ProductActions from '@/components/shop/ProductActions'
 
 async function getProduct(slug: string) {
     const product = await prisma.product.findUnique({
@@ -131,15 +131,13 @@ export default async function ProductDetailPage({
                                 </dl>
                             </div>
 
-                            {/* Add to Cart */}
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <AddToCartButton product={{
-                                    id: product.id,
-                                    name: product.name,
-                                    price: Number(product.price),
-                                    images: product.images as string
-                                }} />
-                            </div>
+                            {/* Add to Cart & Wishlist */}
+                            <ProductActions product={{
+                                id: product.id,
+                                name: product.name,
+                                price: Number(product.price),
+                                images: product.images as string
+                            }} />
 
                             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="flex items-center space-x-3 text-sm text-foreground/80">

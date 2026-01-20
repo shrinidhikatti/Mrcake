@@ -1,44 +1,15 @@
 import { prisma } from '@/lib/prisma'
-import ProductGrid from '@/components/shop/ProductGrid'
+import ProductsClient from '@/components/shop/ProductsClient'
 import BackButton from '@/components/BackButton'
 
-async function getProducts() {
-    return await prisma.product.findMany({
-        include: { category: true },
-        orderBy: { createdAt: 'desc' },
+async function getCategories() {
+    return await prisma.category.findMany({
+        orderBy: { name: 'asc' }
     })
 }
 
-async function getCategories() {
-    return await prisma.category.findMany()
-}
-
 export default async function ProductsPage() {
-    const productsRaw = await getProducts()
     const categories = await getCategories()
-
-    // Transform data
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const products = productsRaw.map((p: any) => {
-        let imageSrc = '/placeholder.png'
-        try {
-            const images = JSON.parse(p.images as string);
-            if (Array.isArray(images) && images.length > 0) {
-                imageSrc = images[0];
-            }
-        } catch (e) { }
-
-        return {
-            id: p.id,
-            name: p.name,
-            price: p.price,
-            image: imageSrc,
-            slug: p.slug,
-            description: p.description,
-            categoryId: p.categoryId,
-            categoryName: p.category?.name
-        };
-    });
 
     return (
         <div className="min-h-screen flex flex-col bg-[#FDFBF7]">
@@ -57,7 +28,7 @@ export default async function ProductsPage() {
             </div>
 
             <main className="flex-grow w-full px-4 sm:px-6 lg:px-8 pb-20">
-                <ProductGrid initialProducts={products} categories={categories} />
+                <ProductsClient categories={categories} />
             </main>
         </div>
     )
